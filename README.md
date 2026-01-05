@@ -1,23 +1,52 @@
-# BaseClick
+<div align="center">
+	<h1>BaseClick</h1>
+	<img src="img/screenshot.png" alt="BaseClick Screenshot" width="480" style="border-radius:12px;box-shadow:0 2px 16px #0003;">
+	<br><br>
+	<b>A minimalist, modern auto clicker for Windows</b>
+	<br>
+	<a href="https://github.com/TudorMarchis/AutoClicker/releases/tag/v1.0.0"><img src="https://img.shields.io/github/v/release/TudorMarchis/AutoClicker?label=Release" alt="Release"></a>
+	<br><br>
+</div>
 
-A minimalist dark-themed auto clicker with global triggers.
 
-- Left and Right auto-clickers
-- Trigger mapping (Left/Right/Middle/Side 1/Side 2)
-- Hold or Toggle activation
-- Adjustable CPS and randomness (jitter)
-- Background operation (global mouse hooks)
+## Features
 
-## Setup
+✔️ Global triggers (side mouse buttons or any keyboard key)<br>
+✔️ Left & right auto-clickers<br>
+✔️ Hold or toggle activation<br>
+✔️ Adjustable CPS (clicks/sec) & randomness (jitter)<br>
+✔️ Minimal CPU usage, runs in background<br>
+✔️ Slick, dark, accent-driven UI<br>
+✔️ Easy config, portable, no admin required
 
-```bash
-pip install -r requirements.txt
-```
+---
 
-## Run
+## Quick Start
 
-```bash
-python main.py
-```
+1. <b>Install dependencies</b>:
+	 ```bash
+	 pip install -r requirements.txt
+	 ```
+2. <b>Run BaseClick</b>:
+	 ```bash
+	 python main.py
+	 ```
+3. <b>Bind triggers</b> (side mouse or keyboard), set your speed & go!
 
-Settings are saved to `%APPDATA%/BaseClick/config.json` on Windows.
+Settings are saved to <code>%APPDATA%/BaseClick/config.json</code> on Windows.
+
+---
+
+## Download
+
+Get the latest release as a ready-to-run EXE:
+
+👉 <a href="https://github.com/TudorMarchis/AutoClicker/releases/tag/v1.0.0"><b>Download BaseClick v1.0.0</b></a>
+
+---
+
+## Screenshot
+
+<div align="center">
+	<img src="img/screenshot.png" alt="BaseClick Screenshot" width="480" style="border-radius:12px;box-shadow:0 2px 16px #0003;">
+</div>

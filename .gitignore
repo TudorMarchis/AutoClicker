@@ -1,0 +1,25 @@
+# Python + PyInstaller .gitignore for BaseClick
+
+# PyInstaller output
+/dist/
+/build/
+# PyInstaller spec file (generated; regenerate as needed)
+*.spec
+
+# Common Python build/cache artifacts
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.dll
+*.log
+
+# Virtual environments (optional; uncomment if used)
+# .venv/
+# venv/
+# env/
+
+# IDE/editor
+.vscode/
