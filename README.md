@@ -1,8 +1,7 @@
 <div align="center">
-	<h1>BaseClick</h1>
-	<img src="img/screenshot.png" alt="BaseClick Screenshot" width="480" style="border-radius:12px;box-shadow:0 2px 16px #0003;">
-	<br><br>
-	<b>A minimalist, modern auto clicker for Windows</b>
+	<img src="img/baseclick-text.png" alt="BaseClick" width="420" style="margin-top:32px;margin-bottom:8px;border-radius:14px;box-shadow:0 2px 16px #0003;">
+	<br>
+	<b style="font-size:1.18em; color:#3DAEE9; letter-spacing:0.5px;">A minimalist, modern auto clicker for Windows</b>
 	<br>
 	<a href="https://github.com/TudorMarchis/AutoClicker/releases/tag/v1.0.0"><img src="https://img.shields.io/github/v/release/TudorMarchis/AutoClicker?label=Release" alt="Release"></a>
 	<br><br>
