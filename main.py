@@ -1,53 +1,113 @@
-from pynput.mouse import Listener, Button, Controller
-import threading
-import time
-import random
+import sys
+from PySide6.QtWidgets import QApplication
+from pynput.mouse import Button
 
-# CONFIG
-CPS = 15
-CLICK_INTERVAL = 1.0 / CPS
+from baseclick.config import load_config, save_config
+from baseclick.clicker import AutoClicker
+from baseclick.triggers import TriggerManager
+from baseclick.ui.main_window import MainWindow
 
-# Randomness
-JITTER_RATIO = 0.25
 
-mouse = Controller()
+class AppController:
+    def __init__(self) -> None:
+        self.cfg = load_config()
+        self.left_clicker = AutoClicker(Button.left, cps=self.cfg.cps, jitter_ratio=self.cfg.jitter_ratio)
+        self.right_clicker = AutoClicker(Button.right, cps=self.cfg.cps, jitter_ratio=self.cfg.jitter_ratio)
+        self.triggers = TriggerManager()
 
-right_event = threading.Event()   # Activated by side button 1 (x1)
-left_event = threading.Event()    # Activated by side button 2 (x2)
+        self._mode = self.cfg.mode  # 'hold' or 'toggle'
+        self._left_toggled = False
+        self._right_toggled = False
 
-def auto_click_loop(event: threading.Event, click_button: Button):
+        self._wire_triggers()
+        self.triggers.start()
 
-    while True:
-        event.wait()  # Block until activated
-        while event.is_set():
-            mouse.click(click_button)
-            if JITTER_RATIO > 0:
-                low = max(0.0, CLICK_INTERVAL * (1 - JITTER_RATIO))
-                high = CLICK_INTERVAL * (1 + JITTER_RATIO)
-                delay = random.uniform(low, high)
+    def _wire_triggers(self):
+        self.triggers.set_trigger(self.cfg.left_trigger, self._on_left_trigger)
+        self.triggers.set_trigger(self.cfg.right_trigger, self._on_right_trigger)
+
+    def _on_left_trigger(self, pressed: bool):
+        if self._mode == "hold":
+            if pressed:
+                self.left_clicker.start()
             else:
-                delay = CLICK_INTERVAL
-            time.sleep(delay)
-
-def on_click(x, y, button, pressed):
-    # Map side buttons: x1 -> right-click auto; x2 -> left-click auto
-    if button == Button.x1:
-        if pressed:
-            right_event.set()
-            print("Auto right-click: ON")
+                self.left_clicker.stop()
         else:
-            right_event.clear()
-            print("Auto right-click: OFF")
-    elif button == Button.x2:
-        if pressed:
-            left_event.set()
-            print("Auto left-click: ON")
+            if pressed:
+                self._left_toggled = not self._left_toggled
+                if self._left_toggled:
+                    self.left_clicker.start()
+                else:
+                    self.left_clicker.stop()
+
+    def _on_right_trigger(self, pressed: bool):
+        if self._mode == "hold":
+            if pressed:
+                self.right_clicker.start()
+            else:
+                self.right_clicker.stop()
         else:
-            left_event.clear()
-            print("Auto left-click: OFF")
+            if pressed:
+                self._right_toggled = not self._right_toggled
+                if self._right_toggled:
+                    self.right_clicker.start()
+                else:
+                    self.right_clicker.stop()
 
-threading.Thread(target=auto_click_loop, args=(right_event, Button.right), daemon=True).start()
-threading.Thread(target=auto_click_loop, args=(left_event, Button.left), daemon=True).start()
+    def apply_settings(self, new_cfg):
+        self._mode = new_cfg.mode
+        self.left_clicker.set_rate(new_cfg.cps)
+        self.right_clicker.set_rate(new_cfg.cps)
+        self.left_clicker.set_jitter(new_cfg.jitter_ratio)
+        self.right_clicker.set_jitter(new_cfg.jitter_ratio)
 
-with Listener(on_click=on_click) as listener:
-    listener.join()
+        # Rebind triggers if changed
+        if new_cfg.left_trigger != self.cfg.left_trigger:
+            self.triggers.set_trigger(new_cfg.left_trigger, self._on_left_trigger)
+        if new_cfg.right_trigger != self.cfg.right_trigger:
+            self.triggers.set_trigger(new_cfg.right_trigger, self._on_right_trigger)
+
+        self.cfg = new_cfg
+        save_config(self.cfg)
+
+    def shutdown(self):
+        self.left_clicker.shutdown()
+        self.right_clicker.shutdown()
+        self.triggers.stop()
+
+
+def main():
+    app = QApplication(sys.argv)
+    controller = AppController()
+    win = MainWindow(controller.cfg)
+
+    def on_settings_changed(cfg):
+        controller.apply_settings(cfg)
+
+    def on_request_bind(side: str):
+        # Start capture: accept mouse side buttons and any key
+        def _captured(token: str):
+            # Update config and UI on capture
+            if side == 'left':
+                controller.cfg.left_trigger = token
+                controller.triggers.set_trigger(token, controller._on_left_trigger)
+                win.bound_token_captured.emit('left', token)
+            else:
+                controller.cfg.right_trigger = token
+                controller.triggers.set_trigger(token, controller._on_right_trigger)
+                win.bound_token_captured.emit('right', token)
+            save_config(controller.cfg)
+
+        controller.triggers.capture_once(_captured, allow={"mouse", "key"})
+
+    win.settings_changed.connect(on_settings_changed)
+    win.request_bind.connect(on_request_bind)
+    win.show()
+
+    rc = app.exec()
+    controller.shutdown()
+    sys.exit(rc)
+
+
+if __name__ == "__main__":
+    main()
